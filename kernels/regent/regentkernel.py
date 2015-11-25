@@ -33,7 +33,7 @@ class RegentKernel(Kernel):
             user_expressions=None, allow_stdin=False):
         if not silent:
             dir = datetime.now().strftime("kernellaunch-%Y-%m-%d-%M-%S.%f")
-            tmp_dir = os.path.join("/srv/jupyterhub/launches", dir)
+            tmp_dir = os.path.join("/var/jupyterhub/launches", dir)
             os.mkdir(tmp_dir)
             os.chmod(tmp_dir, stat.S_IRWXO + stat.S_IRWXG + stat.S_IRWXU)
 
@@ -49,8 +49,7 @@ class RegentKernel(Kernel):
             num_nodes = 1
             prof_file = "legion_prof_%.log"
             prof_file_path = os.path.join(tmp_dir, prof_file)
-            regent_interpreter_path = os.path.join("/srv/jupyterhub",
-                    "legion/language/regent.py")
+            regent_interpreter_path = "regent"
 
             with open(torque_file_path, "w") as file:
                 file.write("#!/bin/bash -l\n")
