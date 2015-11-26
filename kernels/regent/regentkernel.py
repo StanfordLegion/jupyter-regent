@@ -82,10 +82,17 @@ class RegentKernel(Kernel):
                 delay = delay * 2
 
             with open(stdout_file_path, "r") as file:
-                output = file.read()
-
-            stream_content = {'name': 'stdout', 'text': output}
+                stdout = file.read()
+            stream_content = {'name': 'stdout', 'text': stdout}
             self.send_response(self.iopub_socket, 'stream', stream_content)
+            with open(stderr_file_path, "r") as file:
+                stderr = file.read()
+            stream_content = {'name': 'stderr', 'text': stderr}
+            self.send_response(self.iopub_socket, 'stream', stream_content)
+            # with open('/tmp/frontend-kernel.png', 'rb') as file:
+            #     image = file.read()
+            # display_content = {'source': 'LegionProf', 'data': { 'image/png': base64.b64encode(image).decode('ascii') }, 'metadata': { 'image/png': {'width' : 640, 'height': '480' } } } 
+            # self.send_response(self.iopub_socket, 'display_data', display_content)
 
         return {'status': 'ok',
                 # The base class increments the execution count
