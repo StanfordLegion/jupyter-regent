@@ -19,6 +19,7 @@ import stat
 from subprocess import Popen, PIPE
 from ipykernel.kernelbase import Kernel
 from datetime import datetime
+import base64
 
 class RegentKernel(Kernel):
     implementation = 'Regent'
@@ -89,10 +90,22 @@ class RegentKernel(Kernel):
                 stderr = file.read()
             stream_content = {'name': 'stderr', 'text': stderr}
             self.send_response(self.iopub_socket, 'stream', stream_content)
-            # with open('/tmp/frontend-kernel.png', 'rb') as file:
-            #     image = file.read()
-            # display_content = {'source': 'LegionProf', 'data': { 'image/png': base64.b64encode(image).decode('ascii') }, 'metadata': { 'image/png': {'width' : 640, 'height': '480' } } } 
-            # self.send_response(self.iopub_socket, 'display_data', display_content)
+
+            # TODO: should pass all legion prof logs
+            prof_file_path = os.path.join(tmp_dir, 'legion_prof_0.log')
+            if stderr == '' and os.path.isfile(prof_file_path):
+                html_file_path = os.path.join("/var/www/files", dir)
+                os.mkdir(html_file_path)
+                html_file_prefix = os.path.join(html_file_path, "legion_prof")
+                legion_prof_path = os.path.join('/usr/local/legion/tools/legion_prof.py')
+                os.system("%s -o %s -T %s" % \
+                    (legion_prof_path, html_file_prefix, prof_file_path))
+                url = os.path.join("/files", dir, "legion_prof_interactive.html")
+                html = '''
+                    <a href="%s" target="_blank">Legion Prof timeline<a><p>
+                    <iframe src="%s" width="800" height="600"></iframe>''' % (url, url)
+                display_content = {'source': 'LegionProf', 'data': { 'text/html': html } }
+                self.send_response(self.iopub_socket, 'display_data', display_content)
 
         return {'status': 'ok',
                 # The base class increments the execution count
