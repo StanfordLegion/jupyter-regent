@@ -15,6 +15,7 @@
 
 import os
 import time
+import shutil
 import stat
 from subprocess import Popen, PIPE
 from ipykernel.kernelbase import Kernel
@@ -33,6 +34,9 @@ class RegentKernel(Kernel):
     def do_execute(self, code, silent, store_history=True,
             user_expressions=None, allow_stdin=False):
         if not silent:
+            root_dir = os.path.dirname(os.path.realpath(__file__))
+            launcher_dir = os.path.join(os.path.dirname(os.path.dirname(root_dir)), 'launcher')
+
             dir = datetime.now().strftime("kernellaunch-%Y-%m-%d-%M-%S.%f")
             tmp_dir = os.path.join("/var/jupyterhub/launches", dir)
             os.mkdir(tmp_dir)
@@ -40,26 +44,31 @@ class RegentKernel(Kernel):
 
             regent_file = "test.rg"
             torque_file = "run.sh"
+            launcher_file = "launcher.py"
 
             regent_file_path = os.path.join(tmp_dir, regent_file)
             torque_file_path = os.path.join(tmp_dir, torque_file)
+            launcher_file_path = os.path.join(tmp_dir, launcher_file)
 
             with open(regent_file_path, "w") as file:
                 file.write(code)
 
             num_nodes = 1
             prof_file = "legion_prof_%.log"
-            prof_file_path = os.path.join(tmp_dir, prof_file)
-            regent_interpreter_path = "/usr/local/jupyter-regent/launcher/launcher.py regent"
+            prof_file_path = os.path.join(tmp_dir, prof_file)3D
+            regent_interpreter_path = "regent"
 
             with open(torque_file_path, "w") as file:
                 file.write("#!/bin/bash -l\n")
                 file.write("#PBS -l nodes=%d\n" % num_nodes)
-                file.write("%s %s -hl:prof %d -level legion_prof=2 -logfile %s\n" % \
-                        (regent_interpreter_path,
-                            regent_file_path,
-                            num_nodes,
-                            prof_file_path))
+                file.write("%s %s %s -hl:prof %d -level legion_prof=2 -logfile %s\n" % \
+                        (launcher_file_path,
+                         regent_interpreter_path,
+                         regent_file_path,
+                         num_nodes,
+                         prof_file_path))
+
+            shutil.copy2(os.path.join(launcher_dir, launcher_file), launcher_file_path)
 
             stdout_file_path = os.path.join(tmp_dir, "stdout")
             stderr_file_path = os.path.join(tmp_dir, "stderr")
