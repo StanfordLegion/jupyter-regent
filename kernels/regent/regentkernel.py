@@ -55,7 +55,7 @@ class RegentKernel(Kernel):
 
             num_nodes = 1
             prof_file = "legion_prof_%.log"
-            prof_file_path = os.path.join(tmp_dir, prof_file)3D
+            prof_file_path = os.path.join(tmp_dir, prof_file)
             regent_interpreter_path = "regent"
 
             with open(torque_file_path, "w") as file:
