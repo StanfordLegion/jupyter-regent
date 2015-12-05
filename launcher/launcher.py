@@ -19,8 +19,14 @@ from __future__ import print_function
 import os, subprocess, sys
 
 def launcher(argv):
+    nodes = 1
+    if 'PBS_NODEFILE' in os.environ:
+        with open(os.environ['PBS_NODEFILE'], 'rb') as f:
+            nodes = len(set(f.read().split()))
+    else:
+        print('WARNING: PBS_NODEFILE unset. Running outside of Torque?')
     env = dict(os.environ.items() + [
-        ('LAUNCHER', 'amudprun -np 1 -spawn C'),
+        ('LAUNCHER', 'amudprun -np {} -spawn C'.format(nodes)),
         ('GASNET_CSPAWN_CMD', 'mpirun -npernode 1 -bind-to-none -x INCLUDE_PATH -x LD_LIBRARY_PATH -x TERRA_PATH %C'),
     ])
     return subprocess.Popen(argv, env = env)
