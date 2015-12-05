@@ -111,7 +111,7 @@ class RegentKernel(Kernel):
                 legion_prof_path = os.path.join('/usr/local/legion/tools/legion_prof.py')
                 os.system("%s -o %s -T %s" % \
                     (legion_prof_path, html_file_prefix, prof_file_path))
-                url = os.path.join("/files", dir, "legion_prof_interactive.html")
+                url = os.path.join("/files", dir, "legion_prof.html")
                 html = '''
                     <a href="%s" target="_blank">Legion Prof timeline<a><p>
                     <iframe src="%s" width="800" height="600"></iframe>''' % (url, url)
