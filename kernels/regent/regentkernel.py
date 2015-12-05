@@ -74,7 +74,9 @@ class RegentKernel(Kernel):
             stderr_file_path = os.path.join(tmp_dir, "stderr")
             # submit the job to torque
             job_process = Popen(["qsub", torque_file_path,
-                "-o", stdout_file_path, "-e", stderr_file_path],
+                "-d", os.path.join(os.getenv("HOME"), "notebooks"),
+                "-o", stdout_file_path,
+                "-e", stderr_file_path],
                 stdout=PIPE, stderr=PIPE)
             job_id = job_process.stdout.read()
 
