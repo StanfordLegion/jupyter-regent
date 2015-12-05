@@ -63,6 +63,7 @@ CodeMirror.defineMode("regent", function(config, parserConfig) {
                          "while", "repeat", "until", "for", "in", "local",
                          "var", "terra", "task", "where", "ispace", "region", "partition", "import",
                          "reads", "writes", "reduces",
+                         "bishop", "processors", "memories", "kind", "isa", "target",
                          "__demand", "__vectorize", "__inline", "__cuda"]);
 
   var indentTokens = wordRE(["task", "terra", "function", "if","repeat","do", "\\(", "{"]);
