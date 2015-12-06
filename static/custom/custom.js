@@ -6,6 +6,7 @@ define([
         events.on("app_initialized.NotebookApp",
             function () {
                 IPython.Cell.options_default.cm_config.indentUnit = 2;
+                IPython.Cell.options_default.cm_config.lineNumbers = true;
             }
         );
     }
