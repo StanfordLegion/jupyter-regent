@@ -54,6 +54,7 @@ class RegentKernel(Kernel):
                 file.write(code)
 
             num_nodes = 1
+            use_cuda = 1 # Right now we'll enable CUDA all the time.
             prof_file = "legion_prof_%.log"
             prof_file_path = os.path.join(tmp_dir, prof_file)
             regent_interpreter_path = "regent"
@@ -61,10 +62,11 @@ class RegentKernel(Kernel):
             with open(torque_file_path, "w") as file:
                 file.write("#!/bin/bash -l\n")
                 file.write("#PBS -l nodes=%d\n" % num_nodes)
-                file.write("%s %s %s -hl:prof %d -level legion_prof=2 -logfile %s\n" % \
+                file.write("%s %s %s -fcuda %d -hl:prof %d -level legion_prof=2 -logfile %s\n" % \
                         (launcher_file_path,
                          regent_interpreter_path,
                          regent_file_path,
+                         use_cuda,
                          num_nodes,
                          prof_file_path))
 
