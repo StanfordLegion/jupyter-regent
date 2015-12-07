@@ -53,7 +53,7 @@ class RegentKernel(Kernel):
             with open(regent_file_path, "w") as file:
                 file.write(code)
 
-            num_nodes = 1
+            num_nodes = 2
             prof_file = "legion_prof_%.log"
             prof_file_path = os.path.join(tmp_dir, prof_file)
             regent_interpreter_path = "regent"
@@ -61,7 +61,7 @@ class RegentKernel(Kernel):
             with open(torque_file_path, "w") as file:
                 file.write("#!/bin/bash -l\n")
                 file.write("#PBS -l nodes=%d\n" % num_nodes)
-                file.write("%s %s %s -hl:prof %d -level legion_prof=2 -logfile %s\n" % \
+                file.write("%s %s %s -hl:prof %d -level legion_prof=2 -logfile %s -ll:cpu 6 -ll:gpu 1\n" % \
                         (launcher_file_path,
                          regent_interpreter_path,
                          regent_file_path,
@@ -103,14 +103,14 @@ class RegentKernel(Kernel):
             self.send_response(self.iopub_socket, 'stream', stream_content)
 
             # TODO: should pass all legion prof logs
-            prof_file_path = os.path.join(tmp_dir, 'legion_prof_0.log')
+            prof_file_paths = " ".join([os.path.join(tmp_dir, "legion_prof_%d.log" % i) for i in range(0, num_nodes)])
             if stderr == '' and os.path.isfile(prof_file_path):
                 html_file_path = os.path.join("/var/www/files", dir)
                 os.mkdir(html_file_path)
                 html_file_prefix = os.path.join(html_file_path, "legion_prof")
                 legion_prof_path = os.path.join('/usr/local/legion/tools/legion_prof.py')
                 os.system("%s -o %s -T %s" % \
-                    (legion_prof_path, html_file_prefix, prof_file_path))
+                    (legion_prof_path, html_file_prefix, prof_file_paths))
                 url = os.path.join("/files", dir, "legion_prof.html")
                 html = '''
                     <a href="%s" target="_blank">Legion Prof timeline<a><p>
