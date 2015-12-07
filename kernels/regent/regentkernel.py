@@ -61,7 +61,7 @@ class RegentKernel(Kernel):
             with open(torque_file_path, "w") as file:
                 file.write("#!/bin/bash -l\n")
                 file.write("#PBS -l nodes=%d\n" % num_nodes)
-                file.write("%s %s %s -hl:prof %d -level legion_prof=2 -logfile %s -ll:cpu 6 -ll:gpu 1\n" % \
+                file.write("%s %s %s -hl:prof %d -level legion_prof=2 -logfile %s -ll:cpu 6 -ll:gpu 1 -fcuda 1\n" % \
                         (launcher_file_path,
                          regent_interpreter_path,
                          regent_file_path,
