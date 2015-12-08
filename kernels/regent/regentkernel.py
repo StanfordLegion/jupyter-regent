@@ -121,7 +121,7 @@ class RegentKernel(Kernel):
                     exitcode = status["exit_status"]
                     error = exitcode != 0
                     if error:
-                        check_output(["qdel ", job_id])
+                        check_output(["qdel", job_id])
                     break
                 time.sleep(delay)
                 delay = delay * 2
