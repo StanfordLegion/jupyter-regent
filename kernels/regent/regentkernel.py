@@ -157,7 +157,7 @@ class RegentKernel(Kernel):
             # self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': prof_result})
             url = os.path.join("/files", dir, "legion_prof.html")
             html = '''
-                <a href="%s" target="_blank">Legion Prof timeline<a><p>
+                <p>Legion Prof timeline (<a href="%s" target="_blank">open in a new window</a>)</p>
                 <iframe src="%s" width="800" height="600"></iframe>''' % (url, url)
             display_content = {'source': 'LegionProf', 'data': { 'text/html': html } }
             self.send_response(self.iopub_socket, 'display_data', display_content)
