@@ -69,7 +69,6 @@ class RegentKernel(Kernel):
             dir = datetime.now().strftime("kernellaunch-%Y-%m-%d-%M-%S.%f")
             tmp_dir = os.path.join("/var/jupyterhub/launches", dir)
             os.mkdir(tmp_dir)
-            os.chmod(tmp_dir, stat.S_IRWXO + stat.S_IRWXG + stat.S_IRWXU)
 
             regent_file = "test.rg"
             torque_file = "run.sh"
@@ -101,13 +100,14 @@ class RegentKernel(Kernel):
 
             stdout_file_path = os.path.join(tmp_dir, "stdout")
             stderr_file_path = os.path.join(tmp_dir, "stderr")
-            # submit the job to torque
+            # Submit the job to Torque.
             job_process = Popen(["qsub", torque_file_path,
                 "-d", os.path.join(os.environ["HOME"], "notebooks"),
                 "-o", stdout_file_path,
                 "-e", stderr_file_path],
                 stdout=PIPE, stderr=PIPE)
             job_out, job_err = job_process.communicate()
+            # If submission failed, abort.
             if job_process.returncode != 0:
                 self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': job_out.decode("utf-8")})
                 self.send_response(self.iopub_socket, 'stream', {'name': 'stderr', 'text': job_err.decode("utf-8")})
@@ -117,7 +117,7 @@ class RegentKernel(Kernel):
             assert(len(job_id) > 0)
             self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': 'Submitted job %s' % job_id})
 
-            # wait until the job finishes
+            # Wait until the job finishes.
             delay = 0.25
             running = True
             exitcode = 0
