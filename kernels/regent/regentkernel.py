@@ -132,7 +132,7 @@ class RegentKernel(Kernel):
                     break
                 time.sleep(delay)
                 delay = min(delay * 2, 10)
-            self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': '\n'})
+            self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': ' finished.\n'})
 
             with open(stdout_file_path, "r") as f:
                 self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': f.read()})
