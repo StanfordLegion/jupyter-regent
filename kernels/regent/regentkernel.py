@@ -109,6 +109,9 @@ class RegentKernel(Kernel):
             job_out, job_err = job_process.communicate()
             # If submission failed, abort.
             if job_process.returncode != 0:
+                # Make a best-effort attempt to kill existing jobs.
+                Popen(["qdel", "all"], stdout=PIPE, stderr=PIPE).wait()
+
                 self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': job_out.decode("utf-8")})
                 self.send_response(self.iopub_socket, 'stream', {'name': 'stderr', 'text': job_err.decode("utf-8")})
                 return {'status': 'error', 'execution_count': self.execution_count,
