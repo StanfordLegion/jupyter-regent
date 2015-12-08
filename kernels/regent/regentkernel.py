@@ -103,39 +103,41 @@ class RegentKernel(Kernel):
             stderr_file_path = os.path.join(tmp_dir, "stderr")
             # submit the job to torque
             job_process = Popen(["qsub", torque_file_path,
-                "-d", os.path.join(os.getenv("HOME"), "notebooks"),
+                "-d", os.path.join(os.environ["HOME"], "notebooks"),
                 "-o", stdout_file_path,
                 "-e", stderr_file_path],
                 stdout=PIPE, stderr=PIPE)
-            job_id = job_process.stdout.read().decode("utf-8").strip()
-            raise Exception(job_id, job_process.stderr.read())
+            job_out, job_err = job_process.communicate()
+            if job_process.returncode != 0:
+                self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': job_out.decode("utf-8")})
+                self.send_response(self.iopub_socket, 'stream', {'name': 'stderr', 'text': job_err.decode("utf-8")})
+                return {'status': 'error', 'execution_count': self.execution_count,
+                        'ename': '', 'evalue': str(job_process.returncode), 'traceback': []}
+            job_id = job_out.decode("utf-8").strip()
             assert(len(job_id) > 0)
+            self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': 'Submitted job %s' % job_id})
 
             # wait until the job finishes
-            delay = 0.0001
+            delay = 0.25
             running = True
             exitcode = 0
             error = False
             while running:
                 status = parse_status(check_output(["qstat", "-f", job_id]).decode("utf-8"))[0]
+                self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': '.'})
                 if status["job_state"] == "C":
                     running = False
                     exitcode = status["exit_status"]
                     error = exitcode != 0
-                    if error:
-                        check_output(["qdel", job_id])
                     break
                 time.sleep(delay)
-                delay = delay * 2
+                delay = min(delay * 2, 10)
+            self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': '\n'})
 
-            with open(stdout_file_path, "r") as file:
-                stdout = file.read()
-            stream_content = {'name': 'stdout', 'text': stdout}
-            self.send_response(self.iopub_socket, 'stream', stream_content)
-            with open(stderr_file_path, "r") as file:
-                stderr = file.read()
-            stream_content = {'name': 'stderr', 'text': stderr}
-            self.send_response(self.iopub_socket, 'stream', stream_content)
+            with open(stdout_file_path, "r") as f:
+                self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': f.read()})
+            with open(stderr_file_path, "r") as f:
+                self.send_response(self.iopub_socket, 'stream', {'name': 'stderr', 'text': f.read()})
 
             if error:
                 return {'status': 'error', 'execution_count': self.execution_count,
