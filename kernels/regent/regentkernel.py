@@ -119,6 +119,8 @@ class RegentKernel(Kernel):
                     running = False
                     exitcode = status["exit_status"]
                     error = exitcode != 0
+                    if error: 
+                        subprocess.check_output("qdel " + job_id)
                     break
                 time.sleep(delay)
                 delay = delay * 2
