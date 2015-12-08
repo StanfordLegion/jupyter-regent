@@ -13,6 +13,7 @@
 # limitations under the License.
 #
 
+from collections import OrderedDict
 import os
 import time
 import shutil
@@ -47,7 +48,7 @@ def parse_status(logs):
                     is_first = False
                 attribute = [line.strip()]
         job.append(parse_attribute(attribute, is_first))
-        jobs.append(collections.OrderedDict(job))
+        jobs.append(OrderedDict(job))
     return jobs
 
 class RegentKernel(Kernel):
