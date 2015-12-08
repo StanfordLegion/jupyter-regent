@@ -106,7 +106,7 @@ class RegentKernel(Kernel):
                 "-o", stdout_file_path,
                 "-e", stderr_file_path],
                 stdout=PIPE, stderr=PIPE)
-            job_id = job_process.stdout.read()
+            job_id = job_process.stdout.read().decode("utf-8")
 
             # wait until the job finishes
             delay = 0.0001
@@ -114,13 +114,13 @@ class RegentKernel(Kernel):
             exitcode = 0
             error = False
             while running:
-                status = parse_status(check_output("qstat -f" + job_id))
+                status = parse_status(check_output(["qstat", "-f", job_id]))
                 if status["job_state"] == "C":
                     running = False
                     exitcode = status["exit_status"]
                     error = exitcode != 0
                     if error:
-                        check_output("qdel " + job_id)
+                        check_output(["qdel ", job_id])
                     break
                 time.sleep(delay)
                 delay = delay * 2
