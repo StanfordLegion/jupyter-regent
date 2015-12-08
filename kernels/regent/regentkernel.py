@@ -17,7 +17,7 @@ import os
 import time
 import shutil
 import stat
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, check_output
 from ipykernel.kernelbase import Kernel
 from datetime import datetime
 import base64
@@ -114,13 +114,13 @@ class RegentKernel(Kernel):
             exitcode = 0
             error = False
             while running:
-                status = parse_status(subprocess.check_output("qstat -f" + job_id))
+                status = parse_status(check_output("qstat -f" + job_id))
                 if status["job_state"] == "C":
                     running = False
                     exitcode = status["exit_status"]
                     error = exitcode != 0
-                    if error: 
-                        subprocess.check_output("qdel " + job_id)
+                    if error:
+                        check_output("qdel " + job_id)
                     break
                 time.sleep(delay)
                 delay = delay * 2
