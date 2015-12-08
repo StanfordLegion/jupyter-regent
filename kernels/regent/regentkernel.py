@@ -106,7 +106,7 @@ class RegentKernel(Kernel):
                 "-o", stdout_file_path,
                 "-e", stderr_file_path],
                 stdout=PIPE, stderr=PIPE)
-            job_id = job_process.stdout.read().decode("utf-8")
+            job_id = job_process.stdout.read().decode("utf-8").strip()
 
             # wait until the job finishes
             delay = 0.0001
