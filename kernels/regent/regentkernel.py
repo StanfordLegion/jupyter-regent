@@ -22,6 +22,34 @@ from ipykernel.kernelbase import Kernel
 from datetime import datetime
 import base64
 
+def parse_attribute(attribute, is_first):
+    attribute = ''.join(attribute)
+    if is_first:
+        key, value = attribute.split(': ', 1)
+        return (key.lower().replace(' ', '_'), value)
+    key, value = attribute.split(' = ', 1)
+    return (key.lower().replace(' ', '_'), value)
+
+def parse_status(logs):
+    entries = [entry for entry in logs.split('\n\n') if len(entry.strip()) > 0]
+    jobs = []
+    for entry in entries:
+        lines = entry.split('\n')
+        job = []
+        attribute = None
+        is_first = True
+        for line in lines:
+            if line.startswith('\t'):
+                attribute.append(line.strip())
+            else:
+                if attribute is not None:
+                    job.append(parse_attribute(attribute, is_first))
+                    is_first = False
+                attribute = [line.strip()]
+        job.append(parse_attribute(attribute, is_first))
+        jobs.append(collections.OrderedDict(job))
+    return jobs
+
 class RegentKernel(Kernel):
     implementation = 'Regent'
     implementation_version = '1.0'
@@ -82,14 +110,16 @@ class RegentKernel(Kernel):
 
             # wait until the job finishes
             delay = 0.0001
-            check_result = ""
-            while check_result == "":
-                check_process = Popen(["qstat", "-f", job_id,
-                    "|", "grep", "\"job_state = C\""], stdout=PIPE, stderr=PIPE)
-                check_result = check_process.stdout.read().strip()
-                if not os.path.isfile(stdout_file_path) or \
-                        not os.path.isfile(stderr_file_path):
-                    check_result = ""
+            running = True
+            exitcode = 0
+            error = False
+            while running:
+                status = parse_status(subprocess.check_output("qstat -f" + job_id))
+                if status["job_state"] == "C":
+                    running = False
+                    exitcode = status["exit_status"]
+                    error = exitcode != 0
+                    break
                 time.sleep(delay)
                 delay = delay * 2
 
@@ -102,21 +132,23 @@ class RegentKernel(Kernel):
             stream_content = {'name': 'stderr', 'text': stderr}
             self.send_response(self.iopub_socket, 'stream', stream_content)
 
-            # TODO: should pass all legion prof logs
+            if error:
+                return {'status': 'error', 'execution_count': self.execution_count,
+                        'ename': '', 'evalue': str(exitcode), 'traceback': []}
+
             prof_file_paths = " ".join([os.path.join(tmp_dir, "legion_prof_%d.log" % i) for i in range(0, num_nodes)])
-            if stderr == '' and os.path.isfile(prof_file_path):
-                html_file_path = os.path.join("/var/www/files", dir)
-                os.mkdir(html_file_path)
-                html_file_prefix = os.path.join(html_file_path, "legion_prof")
-                legion_prof_path = os.path.join('/usr/local/legion/tools/legion_prof.py')
-                os.system("%s -o %s -T %s" % \
-                    (legion_prof_path, html_file_prefix, prof_file_paths))
-                url = os.path.join("/files", dir, "legion_prof.html")
-                html = '''
-                    <a href="%s" target="_blank">Legion Prof timeline<a><p>
-                    <iframe src="%s" width="800" height="600"></iframe>''' % (url, url)
-                display_content = {'source': 'LegionProf', 'data': { 'text/html': html } }
-                self.send_response(self.iopub_socket, 'display_data', display_content)
+            html_file_path = os.path.join("/var/www/files", dir)
+            os.mkdir(html_file_path)
+            html_file_prefix = os.path.join(html_file_path, "legion_prof")
+            legion_prof_path = os.path.join('/usr/local/legion/tools/legion_prof.py')
+            os.system("%s -o %s -T %s" % \
+                (legion_prof_path, html_file_prefix, prof_file_paths))
+            url = os.path.join("/files", dir, "legion_prof.html")
+            html = '''
+                <a href="%s" target="_blank">Legion Prof timeline<a><p>
+                <iframe src="%s" width="800" height="600"></iframe>''' % (url, url)
+            display_content = {'source': 'LegionProf', 'data': { 'text/html': html } }
+            self.send_response(self.iopub_socket, 'display_data', display_content)
 
         return {'status': 'ok',
                 # The base class increments the execution count
