@@ -115,7 +115,7 @@ class RegentKernel(Kernel):
             exitcode = 0
             error = False
             while running:
-                status = parse_status(check_output(["qstat", "-f", job_id]).decode("utf-8"))
+                status = parse_status(check_output(["qstat", "-f", job_id]).decode("utf-8"))[0]
                 if status["job_state"] == "C":
                     running = False
                     exitcode = status["exit_status"]
