@@ -14,6 +14,7 @@
 #
 
 from collections import OrderedDict
+import glob
 import os
 import time
 import shutil
@@ -89,7 +90,7 @@ class RegentKernel(Kernel):
             with open(torque_file_path, "w") as file:
                 file.write("#!/bin/bash -l\n")
                 # file.write("#PBS -l nodes=%d\n" % num_nodes)
-                file.write("%s %s %s -hl:prof %d -level legion_prof=2 -logfile %s -ll:cpu 16 -ll:gpu 4 -ll:csize 16384 -ll:rsize 2048 -ll:fsize 2048 -ll:zsize 2048\n" % \
+                file.write("%s %s %s -hl:prof %d -level legion_prof=2 -logfile %s -ll:cpu 16 -ll:gpu 4 -ll:csize 16384 -ll:rsize 2048 -ll:gsize 0 -ll:fsize 2048 -ll:zsize 2048\n" % \
                         (launcher_file_path,
                          regent_interpreter_path,
                          regent_file_path,
@@ -130,7 +131,7 @@ class RegentKernel(Kernel):
                 self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': '.'})
                 if status["job_state"] == "C":
                     running = False
-                    exitcode = status["exit_status"]
+                    exitcode = int(status["exit_status"])
                     error = exitcode != 0
                     break
                 time.sleep(delay)
@@ -143,16 +144,17 @@ class RegentKernel(Kernel):
                 self.send_response(self.iopub_socket, 'stream', {'name': 'stderr', 'text': f.read()})
 
             if error:
+                self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': 'Exited with return code %s.\n' % exitcode})
                 return {'status': 'error', 'execution_count': self.execution_count,
                         'ename': '', 'evalue': str(exitcode), 'traceback': []}
 
-            prof_file_paths = " ".join([os.path.join(tmp_dir, "legion_prof_%d.log" % i) for i in range(0, num_nodes)])
+            prof_file_paths = " ".join(glob.glob(os.path.join(tmp_dir, "legion_prof_*.log")))
             html_file_path = os.path.join("/var/www/files", dir)
             os.mkdir(html_file_path)
             html_file_prefix = os.path.join(html_file_path, "legion_prof")
             legion_prof_path = os.path.join('/usr/local/legion/tools/legion_prof.py')
-            os.system("%s -o %s -T %s" % \
-                (legion_prof_path, html_file_prefix, prof_file_paths))
+            check_output(["python", legion_prof_path, "-o", html_file_prefix, "-T", prof_file_paths])
+            # self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': prof_result})
             url = os.path.join("/files", dir, "legion_prof.html")
             html = '''
                 <a href="%s" target="_blank">Legion Prof timeline<a><p>
