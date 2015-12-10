@@ -124,14 +124,14 @@ class RegentKernel(Kernel):
             # Wait until the job finishes.
             delay = 0.25
             running = True
-            exitcode = 0
+            exitcode = -1
             error = False
             while running:
                 status = parse_status(check_output(["qstat", "-f", job_id]).decode("utf-8"))[0]
                 self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': '.'})
                 if status["job_state"] == "C":
                     running = False
-                    exitcode = int(status["exit_status"])
+                    if "exit_status" in status: exitcode = int(status["exit_status"])
                     error = exitcode != 0
                     break
                 time.sleep(delay)
