@@ -4,21 +4,18 @@ FROM ubuntu:14.04
 
 MAINTAINER Elliott Slaughter <slaughter@cs.stanford.edu>
 
-# Install dependencies as root
-USER root
-
+# Install Dependencies.
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
-    apt-get install -y build-essential clang-3.5 git libclang-3.5-dev libncurses5-dev llvm-3.5-dev python3-pip zlib1g-dev && \
+    apt-get install -y build-essential clang-3.5 git libclang-3.5-dev libncurses5-dev llvm-3.5-dev python3-pip wget zlib1g-dev && \
     apt-get clean
+RUN pip3 install ipython notebook
 
-# Install Tini
+# Install Tini.
 RUN wget --quiet https://github.com/krallin/tini/releases/download/v0.6.0/tini && \
     echo "d5ed732199c36a1189320e6c4859f0169e950692f451c03e7854243b95f4234b *tini" | sha256sum -c - && \
     mv tini /usr/local/bin/tini && \
     chmod +x /usr/local/bin/tini
-
-RUN pip3 install ipython notebook
 
 # Install Regent.
 RUN git clone -b master https://github.com/StanfordLegion/legion.git /usr/local/legion && \
@@ -41,3 +38,9 @@ RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
 COPY static/custom/custom.js /home/$NB_USER/.ipython/profile_default/static/custom/custom.js
 COPY ["notebooks/Getting Started.ipynb", "/home/$NB_USER/notebooks/Getting Started.ipynb"]
 RUN chown -R $NB_USER:users /home/$NB_USER
+
+# Configure container startup.
+EXPOSE 8888
+WORKDIR /home/$NB_USER/notebooks
+ENTRYPOINT ["tini", "--"]
+CMD ["su", "$NB_USER", "-c", "jupyter", "notebook"]
