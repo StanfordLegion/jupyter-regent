@@ -91,8 +91,9 @@ class RegentKernel(ipykernel.kernelbase.Kernel):
         regent_interpreter_path = 'regent'
 
         if not use_torque:
-            proc = Popen([regent_interpreter_path, regent_fiel_path, '-ll:cpu', '1', '-ll:csize', '100'],
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            proc = subprocess.Popen(
+                [regent_interpreter_path, regent_fiel_path, '-ll:cpu', '1', '-ll:csize', '100'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
 
             self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': stdout.decode('utf-8')})
@@ -141,7 +142,7 @@ class RegentKernel(ipykernel.kernelbase.Kernel):
             # If submission failed, abort.
             if job_process.returncode != 0:
                 # Make a best-effort attempt to kill existing jobs.
-                Popen(['qdel', 'all'], stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait()
+                subprocess.Popen(['qdel', 'all'], stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait()
 
                 self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': job_out.decode('utf-8')})
                 self.send_response(self.iopub_socket, 'stream', {'name': 'stderr', 'text': job_err.decode('utf-8')})
