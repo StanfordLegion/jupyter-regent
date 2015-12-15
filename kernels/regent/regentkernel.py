@@ -63,6 +63,7 @@ class RegentKernel(Kernel):
 
     def do_execute(self, code, silent, store_history=True,
             user_expressions=None, allow_stdin=False):
+        use_torque = bool(os.environ['torque'])
         if not silent:
             root_dir = os.path.dirname(os.path.realpath(__file__))
             launcher_dir = os.path.join(os.path.dirname(os.path.dirname(root_dir)), 'launcher')

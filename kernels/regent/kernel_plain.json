@@ -1,4 +1,5 @@
 { "argv": ["python3", "/usr/local/share/jupyter/kernels/regent/regentkernel.py", "-f", "{connection_file}"],
+  "env": {"torque", "False"},
   "display_name": "Regent",
   "language": "regent",
   "name": "regent"
