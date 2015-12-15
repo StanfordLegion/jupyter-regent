@@ -18,15 +18,13 @@ RUN wget --quiet https://github.com/krallin/tini/releases/download/v0.6.0/tini &
     chmod +x /usr/local/bin/tini
 
 # Regent kernel configuration files.
-RUN mkdir /usr/local/lib/python3.4/dist-packages/notebook/static/components/codemirror/mode/regent
-COPY codemirror/regent/regent.js /usr/local/lib/python3.4/dist-packages/notebook/static/components/codemirror/mode/regent/regent.js
+COPY codemirror/regent /usr/local/lib/python3.4/dist-packages/notebook/static/components/codemirror/mode/
 
 RUN mkdir -p /usr/local/share/jupyter/kernels/regent
 COPY kernels/regent/kernel_plain.json /usr/local/share/jupyter/kernels/regent/kernel.json
 COPY kernels/regent/regentkernel.py /usr/local/share/jupyter/kernels/regent/regentkernel.py
 
-ENV NB_USER jovyan
-ENV NB_UID 1001
+ENV NB_USER=jovyan NB_UID=1001
 RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
     mkdir /home/$NB_USER/notebooks && \
     mkdir /home/$NB_USER/.jupyter && \
@@ -40,7 +38,7 @@ ENTRYPOINT ["tini", "--"]
 CMD ["start-notebook.sh"]
 
 # Configure local files last.
-COPY ["start-notebook.sh", "/usr/local/bin/"]
-COPY ["jupyter_notebook_config.py", "static/custom", "/home/$NB_USER/.jupyter/"]
+COPY start-notebook.sh /usr/local/bin/
+COPY jupyter_notebook_config.py static/custom /home/$NB_USER/.jupyter/
 COPY ["notebooks/Getting Started.ipynb", "/home/$NB_USER/notebooks/Getting Started.ipynb"]
 RUN chown -R $NB_USER:users /home/$NB_USER
