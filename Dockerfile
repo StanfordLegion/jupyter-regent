@@ -22,7 +22,7 @@ RUN mkdir /usr/local/lib/python3.4/dist-packages/notebook/static/components/code
 COPY codemirror/regent/regent.js /usr/local/lib/python3.4/dist-packages/notebook/static/components/codemirror/mode/regent/regent.js
 
 RUN mkdir -p /usr/local/share/jupyter/kernels/regent
-COPY kernels/regent/kernel.json /usr/local/share/jupyter/kernels/regent/kernel.json
+COPY kernels/regent/kernel_plain.json /usr/local/share/jupyter/kernels/regent/kernel.json
 COPY kernels/regent/regentkernel.py /usr/local/share/jupyter/kernels/regent/regentkernel.py
 
 ENV NB_USER jovyan
