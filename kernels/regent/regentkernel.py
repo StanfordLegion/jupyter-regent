@@ -78,7 +78,7 @@ class RegentKernel(ipykernel.kernelbase.Kernel):
                 'user_expressions': {},
             }
 
-        use_torque = 'torque' in os.environ and bool(os.environ['torque'])
+        use_torque = 'torque' in os.environ and os.environ['torque'] == 'true'
 
         root_dir = os.path.dirname(os.path.realpath(__file__))
         tmp_dir = tempfile.mkdtemp(
