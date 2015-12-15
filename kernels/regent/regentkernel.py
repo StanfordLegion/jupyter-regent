@@ -16,7 +16,8 @@
 import base64
 import collections
 import glob
-import ipykernel
+import ipykernel.kernelapp
+import ipykernel.kernelbase
 import os
 import shutil
 import stat
