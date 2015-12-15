@@ -40,6 +40,7 @@ CMD ["start-notebook.sh"]
 
 # Configure local files last.
 COPY start-notebook.sh /usr/local/bin/
-COPY jupyter_notebook_config.py static/custom /home/$NB_USER/.jupyter/
+COPY jupyter_notebook_config.py /home/$NB_USER/.jupyter/
+COPY static/custom/custom.js /home/$NB_USER/.jupyter/custom/
 COPY notebooks/ /home/$NB_USER/notebooks/
 RUN chown -R $NB_USER:users /home/$NB_USER
