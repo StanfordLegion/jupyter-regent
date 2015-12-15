@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
     apt-get install -y python3-pip wget && \
     apt-get clean
-RUN pip3 install ipython notebook
+RUN pip3 install notebook
 
 # Install Tini.
 RUN wget --quiet https://github.com/krallin/tini/releases/download/v0.6.0/tini && \
