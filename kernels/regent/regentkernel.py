@@ -92,7 +92,7 @@ class RegentKernel(ipykernel.kernelbase.Kernel):
 
         if not use_torque:
             proc = subprocess.Popen(
-                [regent_interpreter_path, regent_file_path, '-ll:cpu', '1', '-ll:csize', '100'],
+                [regent_interpreter_path, regent_file_path, '-ll:cpu', '1', '-ll:csize', '100', '-level', 'threads=5'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
 
