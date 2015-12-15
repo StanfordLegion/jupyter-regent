@@ -58,13 +58,14 @@ CodeMirror.defineMode("regent", function(config, parserConfig) {
 
     "table.concat","table.insert","table.maxn","table.remove","table.sort"
   ]);
-  var keywords = wordRE(["and","break","elseif","false","nil","not","or","return",
-                         "true","function", "end", "if", "then", "else", "do",
-                         "while", "repeat", "until", "for", "in", "local",
-                         "var", "terra", "task", "where", "ispace", "region", "partition", "import",
-                         "reads", "writes", "reduces",
-                         "mapper", "processors", "memories", "kind", "isa", "target",
-                         "__demand", "__vectorize", "__inline", "__cuda"]);
+  var keywords = wordRE([
+      "__cuda", "__demand", "__inline", "__vectorize", "and", "break",
+      "do", "else", "elseif", "end", "false", "for", "function", "if",
+      "import", "in", "isa", "ispace", "kind", "local", "mapper",
+      "memories", "new", "nil", "not", "or", "partition",
+      "processors", "reads", "reduces", "region", "repeat", "return",
+      "struct", "target", "task", "terra", "then", "true", "until", "var",
+      "where", "while", "writes"]);
 
   var indentTokens = wordRE(["task", "terra", "function", "if","repeat","do", "\\(", "{"]);
   var dedentTokens = wordRE(["end", "until", "\\)", "}"]);
