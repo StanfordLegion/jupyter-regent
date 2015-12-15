@@ -26,16 +26,21 @@ COPY kernels/regent/kernel.json /usr/local/share/jupyter/kernels/regent/kernel.j
 COPY kernels/regent/regentkernel.py /usr/local/share/jupyter/kernels/regent/regentkernel.py
 
 ENV NB_USER jovyan
-ENV NB_UID 1000
+ENV NB_UID 1001
 RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
     mkdir /home/$NB_USER/notebooks && \
-    mkdir -p /home/$NB_USER/.ipython/profile_default/static/custom
-COPY static/custom/custom.js /home/$NB_USER/.ipython/profile_default/static/custom/custom.js
-COPY ["notebooks/Getting Started.ipynb", "/home/$NB_USER/notebooks/Getting Started.ipynb"]
-RUN chown -R $NB_USER:users /home/$NB_USER
+    mkdir /home/$NB_USER/.jupyter && \
+    mkdir /home/$NB_USER/.jupyter/custom && \
+    chown -R $NB_USER:users /home/$NB_USER
 
 # Configure container startup.
 EXPOSE 8888
 WORKDIR /home/$NB_USER/notebooks
 ENTRYPOINT ["tini", "--"]
-CMD ["su", "$NB_USER", "-c", "jupyter", "notebook"]
+CMD ["start-notebook.sh"]
+
+# Configure local files last.
+COPY ["start-notebook.sh", "/usr/local/bin/"]
+COPY ["jupyter_notebook_config.py", "static/custom", "/home/$NB_USER/.jupyter/"]
+COPY ["notebooks/Getting Started.ipynb", "/home/$NB_USER/notebooks/Getting Started.ipynb"]
+RUN chown -R $NB_USER:users /home/$NB_USER
