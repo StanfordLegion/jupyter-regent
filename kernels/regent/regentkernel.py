@@ -61,7 +61,7 @@ class RegentKernel(ipykernel.kernelbase.Kernel):
     language_info = {
         'mimetype': 'text/x-regent',
         'name': 'regent',
-        'pygments_lexer': 'lua',
+        'pygments_lexer': 'regent',
         'file_extension': 'rg',
     }
     banner = 'Jupyter kernel for Regent'

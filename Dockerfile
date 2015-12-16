@@ -20,6 +20,8 @@ RUN wget --quiet https://github.com/krallin/tini/releases/download/v0.6.0/tini &
 # Regent kernel configuration files.
 RUN mkdir /usr/local/lib/python3.4/dist-packages/notebook/static/components/codemirror/mode/regent
 COPY codemirror/regent/regent.js /usr/local/lib/python3.4/dist-packages/notebook/static/components/codemirror/mode/regent/
+COPY pygments/lexers/regent.py /usr/local/lib/python3.4/dist-packages/pygments/lexers/
+RUN cd /usr/local/lib/python3.4/dist-packages/pygments/lexers && python3 _mapping.py
 
 RUN mkdir -p /usr/local/share/jupyter/kernels/regent
 COPY kernels/regent/kernel_plain.json /usr/local/share/jupyter/kernels/regent/kernel.json
