@@ -54,8 +54,12 @@ class RegentLexer(LuaLexer):
             (r'[\[\]{}().,:;]', Punctuation),
             (r'(and|or|not)\b', Operator.Word),
 
+            # Lua keywords
             ('(break|do|else|elseif|end|for|if|in|repeat|return|then|until|'
              r'while)\b', Keyword),
+            # Terra keywords
+            (r'(import)\b', Keyword),
+            # Regent keywords
             ('(aliased|atomic|copy|cross_product|disjoint|dynamic_cast|'
              'exclusive|equal|fill|image|isnull|ispace|max|min|new|null|'
              'partition|preimage|product|reads|reduces|relaxed|region|'
@@ -63,7 +67,7 @@ class RegentLexer(LuaLexer):
             (r'(local|var)\b', Keyword.Declaration),
             (r'(true|false|nil)\b', Keyword.Constant),
 
-            (r'(function|task|terra)\b', Keyword, 'funcname'),
+            (r'(function|fspace|task|terra|struct)\b', Keyword, 'funcname'),
 
             (r'[A-Za-z_]\w*(\.[A-Za-z_]\w*)?', Name),
 
