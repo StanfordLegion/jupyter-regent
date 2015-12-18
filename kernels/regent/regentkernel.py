@@ -189,12 +189,12 @@ class RegentKernel(ipykernel.kernelbase.Kernel):
                     'traceback': [],
                 }
 
-            prof_file_paths = ' '.join(glob.glob(os.path.join(tmp_dir, 'legion_prof_*.log')))
+            prof_file_paths = glob.glob(os.path.join(tmp_dir, 'legion_prof_*.log'))
             html_file_path = os.path.join('/var/www/files', dir)
             os.mkdir(html_file_path)
             html_file_prefix = os.path.join(html_file_path, 'legion_prof')
             legion_prof_path = os.path.join('/usr/local/legion/tools/legion_prof.py')
-            subprocess.check_output(['python', legion_prof_path, '-o', html_file_prefix, '-T', prof_file_paths])
+            subprocess.check_output(['python', legion_prof_path, '-o', html_file_prefix, '-T'] + prof_file_paths)
             # self.send_response(self.iopub_socket, 'stream', {'name': 'stdout', 'text': prof_result})
             url = os.path.join('/files', dir, 'legion_prof.html')
             html = '''
